@@ -1,0 +1,62 @@
+extends layout
+
+block content
+  h1= title
+
+  if errors
+    ul
+      each error in errors
+        li!= error.msg
+
+  form(method='POST')
+    div.form-group
+      label(for='title') Title:
+      input#title.form-control(type='text', name='title', required value=(undefined === post ? '' : post.title))
+    
+    div.form-group
+      label(for='description') Description:
+      textarea#description.form-control(name='description', required)= undefined === post ? '' : post.description
+    
+    div.form-group
+      label(for='instructions') Instructions:
+      textarea#instructions.form-control(name='instructions', required)= undefined === post ? '' : post.instructions
+    
+    div.form-group
+      label(for='ingredients') Ingredients:
+      each ingredient, index in (post && post.ingredients ? post.ingredients : [''])
+        div(style='display: flex; margin-bottom: 5px;')
+          input.form-control(type='text', name='ingredients', value=ingredient, placeholder='Ingredient')
+          if index === 0
+            button.btn.btn-secondary(type='button', onclick='addIngredientField()') Add more
+          else
+            button.btn.btn-danger(type='button', onclick='removeIngredientField(this)') Remove
+
+    button.btn.btn-primary(type='submit') Submit
+
+script.
+  function addIngredientField() {
+    var div = document.createElement('div');
+    div.style.display = 'flex';
+    div.style.marginBottom = '5px';
+    
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'ingredients';
+    input.className = 'form-control';
+    input.placeholder = 'Ingredient';
+    
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-danger';
+    button.onclick = function() { removeIngredientField(button); };
+    button.textContent = 'Remove';
+
+    div.appendChild(input);
+    div.appendChild(button);
+
+    document.querySelector('form').insertBefore(div, document.querySelector('form button[type="submit"]'));
+  }
+
+  function removeIngredientField(button) {
+    button.parentNode.remove();
+  }
