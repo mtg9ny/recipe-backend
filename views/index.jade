@@ -2,4 +2,11 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  p Welcome to #[em Recipes]
+
+  h2 Dynamic content
+
+  p The database has the following record counts:
+
+  ul
+    li #[strong Recipes:] !{post_count}

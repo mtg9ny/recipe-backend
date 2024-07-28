@@ -4,7 +4,7 @@ const router = express.Router();
 // Require controller modules.
 const post_controller = require("../controllers/postController");
 
-/// BOOK ROUTES ///
+/// POST ROUTES ///
 
 // GET catalog home page.
 router.get("/", post_controller.index);

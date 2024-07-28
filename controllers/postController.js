@@ -2,7 +2,16 @@ const Post = require("../models/post");
 const asyncHandler = require("express-async-handler");
 
 exports.index = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Site Home Page");
+    const [
+        numPosts,
+    ] = await Promise.all([
+        Post.countDocuments({}).exec(),
+    ]);
+
+    res.render("index", {
+        title: "Local Library Home",
+        post_count: numPosts,
+    });
 });
 
 // Display list of all posts.
