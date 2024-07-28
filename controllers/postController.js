@@ -9,14 +9,15 @@ exports.index = asyncHandler(async (req, res, next) => {
     ]);
 
     res.render("index", {
-        title: "Local Library Home",
+        title: "Recipe Home",
         post_count: numPosts,
     });
 });
 
 // Display list of all posts.
 exports.post_list = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Post list");
+    const allPosts = await Post.find({}, "title description instructions ingredients").exec();
+    res.render("post_list", { title: "Post List", post_list: allPosts });
 });
 
 // Display detail page for a specific post.
