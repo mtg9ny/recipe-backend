@@ -121,10 +121,56 @@ exports.post_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display post update form on GET.
 exports.post_update_get = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Post update GET");
+    const post = await Post.findById(req.params.id).exec();
+
+    if (post === null) {
+        // No results.
+        const err = new Error("Post not found");
+        err.status = 404;
+        return next(err);
+    }
+
+    res.render("post_form", {
+        title: "Update Post",
+        post: post,
+    });
 });
 
 // Handle post update on POST.
-exports.post_update_post = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Post update POST");
-});
+exports.post_update_post = [
+    // Validate and sanitize fields.
+    body('title', 'Title must not be empty.').trim().isLength({ min: 1 }).escape(),
+    body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
+    body('instructions', 'Instructions must not be empty.').trim().isLength({ min: 1 }).escape(),
+    body('ingredients.*').escape(),
+
+    // Process request after validation and sanitization.
+    asyncHandler(async (req, res, next) => {
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create a Post object with escaped/trimmed data and old id.
+        const post = new Post({
+            title: req.body.title,
+            description: req.body.description,
+            instructions: req.body.instructions,
+            ingredients: req.body.ingredients,
+            _id: req.params.id, // This is required, or a new ID will be assigned!
+        });
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render form again with sanitized values/error messages.
+            res.render('post_form', {
+                title: 'Update Post',
+                post: post,
+                errors: errors.array(),
+            });
+            return;
+        } else {
+            // Data from form is valid. Update the record.
+            const updatedPost = await Post.findByIdAndUpdate(req.params.id, post, {});
+            // Redirect to post detail page.
+            res.redirect(`/catalog/post/${updatedPost._id}`);
+        }
+    }),
+];
