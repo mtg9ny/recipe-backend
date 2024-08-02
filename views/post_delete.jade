@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h1 Delete Post
+
+  p Are you sure you want to delete this post?
+  p #[strong Title:] #{post.title}
+  p #[strong Description:] #{post.description}
+  p #[strong Instructions:] #{post.instructions}
+  p #[strong Ingredients:]
+    ul
+      each ingredient in post.ingredients
+        li #{ingredient}
+
+  form(action="/catalog/post/#{post._id}/delete" method="post")
+    input(type="hidden" name="postid" value=post._id)
+    button(type="submit" class="btn btn-danger") Delete
+    a(href="/catalog/posts" class="btn btn-secondary") Cancel

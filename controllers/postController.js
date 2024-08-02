@@ -23,7 +23,19 @@ exports.post_list = asyncHandler(async (req, res, next) => {
 
 // Display detail page for a specific post.
 exports.post_detail = asyncHandler(async (req, res, next) => {
-    res.send(`NOT IMPLEMENTED: Post detail: ${req.params.id}`);
+    const post = await Post.findById(req.params.id).exec();
+
+    if (post === null) {
+        // No results.
+        const err = new Error("Post not found");
+        err.status = 404;
+        return next(err);
+    }
+
+    res.render("post_detail", {
+        title: "Post Details",
+        post: post,
+    });
 });
 
 // Display post create form on GET.
@@ -88,12 +100,23 @@ exports.post_create_post = [
 
 // Display post delete form on GET.
 exports.post_delete_get = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Post delete GET");
+    const post = await Post.findById(req.params.id).exec();
+
+    if (post === null) {
+        // No results.
+        res.redirect("/catalog/posts");
+    }
+
+    res.render("post_delete", {
+        title: "Delete Post",
+        post: post,
+    });
 });
 
 // Handle post delete on POST.
 exports.post_delete_post = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Post delete POST");
+    await Post.findByIdAndDelete(req.body.postid);
+    res.redirect("/catalog/posts");
 });
 
 // Display post update form on GET.

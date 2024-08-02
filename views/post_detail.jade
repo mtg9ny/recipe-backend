@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1 Title: #{post.title}
+
+  p #[strong Description:] #{post.description}
+  p #[strong Instructions:] #{post.instructions}
+  p #[strong Ingredients:]
+    ul
+      each ingredient in post.ingredients
+        li #{ingredient}
+
+  div(style='margin-left:20px;margin-top:20px')
+    h2(style='font-size: 1.5rem;') Post Details
+
+    p #[strong ID:] #{post._id}
+    hr
+    p
+    a(href="/catalog/post/#{post._id}/delete") Delete post
