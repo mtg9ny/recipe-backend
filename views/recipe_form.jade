@@ -11,19 +11,19 @@ block content
   form(method='POST')
     div.form-group
       label(for='title') Title:
-      input#title.form-control(type='text', name='title', required value=(undefined === post ? '' : post.title))
+      input#title.form-control(type='text', name='title', required value=(undefined === recipe ? '' : recipe.title))
     
     div.form-group
       label(for='description') Description:
-      textarea#description.form-control(name='description', required)= undefined === post ? '' : post.description
+      textarea#description.form-control(name='description', required)= undefined === recipe ? '' : recipe.description
     
     div.form-group
       label(for='instructions') Instructions:
-      textarea#instructions.form-control(name='instructions', required)= undefined === post ? '' : post.instructions
+      textarea#instructions.form-control(name='instructions', required)= undefined === recipe ? '' : recipe.instructions
     
     div.form-group
       label(for='ingredients') Ingredients:
-      each ingredient, index in (post && post.ingredients ? post.ingredients : [''])
+      each ingredient, index in (recipe && recipe.ingredients ? recipe.ingredients : [''])
         div(style='display: flex; margin-bottom: 5px;')
           input.form-control(type='text', name='ingredients', value=ingredient, placeholder='Ingredient')
           if index === 0

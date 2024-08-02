@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  h1 Title: #{recipe.title}
+
+  p #[strong Description:] #{recipe.description}
+  p #[strong Instructions:] #{recipe.instructions}
+  p #[strong Ingredients:]
+    ul
+      each ingredient in recipe.ingredients
+        li #{ingredient}
+
+  div(style='margin-left:20px;margin-top:20px')
+    h2(style='font-size: 1.5rem;') Recipe Details
+
+    p #[strong ID:] #{recipe._id}
+    hr
+    p
+    a(href="/catalog/recipe/#{recipe._id}/delete") Delete recipe
+    p
+    a(href="/catalog/recipe/#{recipe._id}/update") Update recipe

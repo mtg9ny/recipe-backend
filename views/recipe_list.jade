@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  h1= title
+  if recipe_list.length
+    ul
+      each recipe in recipe_list
+        li
+          h2
+            a(href=`/catalog/recipe/${recipe._id}`)= recipe.title
+          p
+            strong Description:
+            |  #{recipe.description}
+          p
+            strong Instructions:
+            |  #{recipe.instructions}
+          p
+            strong Ingredients:
+            ul
+              each ingredient in recipe.ingredients
+                li= ingredient
+  else
+    p There are no recipes.
