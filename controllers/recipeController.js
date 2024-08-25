@@ -18,7 +18,7 @@ exports.index = asyncHandler(async (req, res, next) => {
 // Display list of all recipes.
 exports.recipe_list = asyncHandler(async (req, res, next) => {
     const allRecipes = await Recipe.find({}, "title description instructions ingredients").exec();
-    res.render("recipe_list", { title: "Recipe List", recipe_list: allRecipes });
+    res.json({ recipes: allRecipes });
 });
 
 // Display detail page for a specific recipe.
@@ -47,24 +47,24 @@ exports.recipe_create_get = asyncHandler(async (req, res, next) => {
 
 // Handle recipe create on POST.
 exports.recipe_create_post = [
+    // Middleware to ensure ingredients is an array
     (req, res, next) => {
         if (!Array.isArray(req.body.ingredients)) {
-            req.body.ingredients =
-                typeof req.body.ingredients === "undefined" ? [] : [req.body.ingredients];
+            req.body.ingredients = typeof req.body.ingredients === "undefined" ? [] : [req.body.ingredients];
         }
         next();
     },
 
     // Validate and sanitize fields.
-    body("title", "Title must not be empty.")
+    body("title", "Title must not be empty")
         .trim()
         .isLength({ min: 1 })
         .escape(),
-    body("description", "Description must be longer.")
+    body("description", "Description must be longer")
         .trim()
         .isLength({ min: 10 })
         .escape(),
-    body("instructions", "Instructions must be longer.")
+    body("instructions", "Instructions must be longer")
         .trim()
         .isLength({ min: 10 })
         .escape(),
@@ -84,16 +84,15 @@ exports.recipe_create_post = [
         });
 
         if (!errors.isEmpty()) {
-            // There are errors. Render form again with sanitized values/error messages.
-            res.render("recipe_form", {
-                title: "Create Recipe",
-                recipe: recipe,
+            // There are errors. Send error messages back to the frontend.
+            return res.status(400).json({
                 errors: errors.array(),
             });
         } else {
-            // Data from form is valid. Save recipe.
+            // Data from form is valid. Save recipe to the database.
             await recipe.save();
-            res.redirect(`/catalog/recipe${recipe.url}`);
+            // Send a success response back to the frontend.
+            res.status(201).json({ message: "Recipe created successfully!", recipe });
         }
     }),
 ];
@@ -116,7 +115,6 @@ exports.recipe_delete_get = asyncHandler(async (req, res, next) => {
 // Handle recipe delete on POST.
 exports.recipe_delete_post = asyncHandler(async (req, res, next) => {
     await Recipe.findByIdAndDelete(req.body.recipeid);
-    res.redirect("/catalog/recipes");
 });
 
 // Display recipe update form on GET.
@@ -136,41 +134,60 @@ exports.recipe_update_get = asyncHandler(async (req, res, next) => {
     });
 });
 
-// Handle recipe update on POST.
 exports.recipe_update_post = [
-    // Validate and sanitize fields.
     body('title', 'Title must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('instructions', 'Instructions must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('ingredients.*').escape(),
 
-    // Process request after validation and sanitization.
     asyncHandler(async (req, res, next) => {
-        // Extract the validation errors from a request.
         const errors = validationResult(req);
 
-        // Create a Recipe object with escaped/trimmed data and old id.
-        const recipe = new Recipe({
+        // Ensure the ID is correctly retrieved from the request
+        const recipeId = req.body._id;
+
+        const recipe = {
             title: req.body.title,
             description: req.body.description,
             instructions: req.body.instructions,
             ingredients: req.body.ingredients,
-            _id: req.params.id, // This is required, or a new ID will be assigned!
-        });
+        };
 
         if (!errors.isEmpty()) {
-            // There are errors. Render form again with sanitized values/error messages.
-            res.render('recipe_form', {
-                title: 'Update Recipe',
-                recipe: recipe,
+            return res.status(400).json({
                 errors: errors.array(),
             });
-            return;
         } else {
-            // Data from form is valid. Update the record.
-            const updatedRecipe = await Recipe.findByIdAndUpdate(req.params.id, recipe, {});
-            // Redirect to recipe detail page.
-            res.redirect(`/catalog/recipe/${updatedRecipe._id}`);
+            // Use findByIdAndUpdate to update the existing document
+            const updatedRecipe = await Recipe.findByIdAndUpdate(recipeId, recipe, { new: true });
+            if (!updatedRecipe) {
+                return res.status(404).json({ message: 'Recipe not found' });
+            }
+            res.status(200).json({ message: 'Recipe updated successfully', recipe: updatedRecipe });
         }
     }),
 ];
+
+
+// Handle recipe update on PUT.
+exports.recipe_update_put = asyncHandler(async (req, res, next) => {
+    try {
+        const { id, title, description, instructions, ingredients } = req.body;
+
+        // Find and update the recipe by ID
+        const updatedRecipe = await Recipe.findByIdAndUpdate(id, {
+            title,
+            description,
+            instructions,
+            ingredients,
+        }, { new: true });
+
+        if (!updatedRecipe) {
+            return res.status(404).json({ message: 'Recipe not found' });
+        }
+
+        res.status(200).json({ message: 'Recipe updated successfully', recipe: updatedRecipe });
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Failed to update recipe' }] });
+    }
+});

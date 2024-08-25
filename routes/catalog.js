@@ -33,4 +33,6 @@ router.get("/recipe/:id", recipe_controller.recipe_detail);
 // GET request for list of all Recipe items.
 router.get("/recipes", recipe_controller.recipe_list);
 
+router.put('/recipe/:id/update', recipe_controller.recipe_update_put);
+
 module.exports = router;

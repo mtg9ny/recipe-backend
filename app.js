@@ -1,6 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 const mongoose = require("mongoose");
+const cors = require('cors');
 mongoose.set("strictQuery", false);
 const mongoDB = "mongodb+srv://ctl27305:4auLzC1AFWyIpmGC@cluster0.nryhu9t.mongodb.net/recipe?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 
 app.use("/", indexRouter);
 app.use("/catalog", catalogRouter); // Add catalog routes to middleware chain.
